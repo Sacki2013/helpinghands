@@ -29,3 +29,15 @@ module.exports.listUsers = function(callback) {
 module.exports.getUser = function(id, callback) {
   User.findById(id, callback);
 }
+
+module.exports.getUserByUsername = function(userName, callback) {
+  const query = { userName: userName };
+  User.findOne(query, callback);
+}
+
+module.exports.comparePassword = function(loginPassword, hash, callback) {
+  bcrypt.compare(loginPassword, hash, (err, isMatch) => {
+    if (err) throw err; // TODO:
+    callback(null, isMatch);
+  })
+}

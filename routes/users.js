@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const config = require('../config/database');
 
 // Register
 router.post('/register', (req, res, next) => {
@@ -62,6 +65,46 @@ router.get('/:id', (req, res, next) => {
         user: user
       });
     }
+  });
+});
+
+router.post('/authenticate', (req, res, next) => {
+  let userName = req.body.userName;
+  let password = req.body.password;
+
+  User.getUserByUsername(userName, (err, user) => {
+    if (err) throw err; // TODO: Improve this response to err
+
+    if (!user) {
+      res.json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    let signedUser = {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email
+    }
+
+    User.comparePassword(password, user.password, (err, isMatch) => {
+      if (err) throw err; // TODO: Improve this response to err
+      if (isMatch) {
+        const token = jwt.sign(signedUser, "secret", { // TODO: Change secret to config.secret
+          expiresIn: 604800 // A week
+        });
+        res.json({
+          success: true,
+          token: 'JWT ' + token
+        });
+      } else {
+        res.json({
+          success: false,
+          message: 'Incorrect Password'
+        })
+      }
+    });
   });
 });
 
