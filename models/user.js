@@ -21,3 +21,11 @@ module.exports.register = function(newUser, callback) {
     });
   });
 }
+
+module.exports.listUsers = function(callback) {
+  User.find(callback);
+}
+
+module.exports.getUser = function(id, callback) {
+  User.findById(id, callback);
+}
