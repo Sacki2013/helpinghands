@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const logger = require('morgan');
 const path = require('path');
 const cors = require('cors');
+const passport = require('passport');
 
 // Files
 const config = require('./config/database');
@@ -32,6 +33,9 @@ server.use(bodyParser.json());
 server.use(express.static(path.join(__dirname, 'client')));
 server.use('/user', Users);
 server.use('/testimonials', Testimonials);
+server.use(passport.initialize());
+server.use(passport.session());
+require('./config/passport')(passport);
 
 // Start Server
 server.listen(port, (err) => {

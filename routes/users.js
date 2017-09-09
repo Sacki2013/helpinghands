@@ -13,6 +13,7 @@ router.post('/register', (req, res, next) => {
     lastName: req.body.lastName,
     userName: req.body.userName,
     email: req.body.email,
+    gdcReg: req.body.gdcReg,
     password: req.body.password
   });
 
@@ -85,7 +86,8 @@ router.post('/authenticate', (req, res, next) => {
       id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email
+      email: user.email,
+      admin: user.admin
     }
 
     User.comparePassword(password, user.password, (err, isMatch) => {
@@ -96,7 +98,8 @@ router.post('/authenticate', (req, res, next) => {
         });
         res.json({
           success: true,
-          token: 'JWT ' + token
+          token: 'JWT ' + token,
+          user: signedUser
         });
       } else {
         res.json({
@@ -105,6 +108,13 @@ router.post('/authenticate', (req, res, next) => {
         })
       }
     });
+  });
+});
+
+// Profile
+router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+  res.json({
+    user: req.user
   });
 });
 
