@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const request = require('request');
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const User = require('../models/user');
 const config = require('../config/database');
@@ -14,6 +17,7 @@ router.post('/register', (req, res, next) => {
     userName: req.body.userName,
     email: req.body.email,
     gdcReg: req.body.gdcReg,
+    status: req.body.status,
     password: req.body.password
   });
 
@@ -48,6 +52,20 @@ router.get('/list', (req, res, next) => {
         users: users
       });
     }
+  });
+});
+
+router.get('/verify/:ref', (req, res, next) => { 
+  let ref = req.params.ref;
+  console.log('ref: ', ref);
+  request('https://olr.gdc-uk.org/SearchRegister/SearchResult?RegistrationNumber=' + ref, function (error, response, body) {
+    console.log('error:', error); // Print the error if one occurred and handle it
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    const dom = new JSDOM(body);
+    const status = dom.window.document.querySelectorAll('.singleResultData')[1].textContent;
+    res.json({
+      status: status
+    });
   });
 });
 
@@ -117,5 +135,7 @@ router.get('/profile', passport.authenticate('jwt', { session: false }), (req, r
     user: req.user
   });
 });
+
+
 
 module.exports = router;
