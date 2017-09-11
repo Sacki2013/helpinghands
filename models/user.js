@@ -28,6 +28,10 @@ module.exports.listUsers = function(callback) {
   User.find(callback);
 }
 
+module.exports.getUserById = function(id, callback) {
+  User.findById(id, callback);
+}
+
 module.exports.getUser = function(id, callback) {
   User.findById(id, callback);
 }

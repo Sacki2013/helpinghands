@@ -38,8 +38,9 @@ router.post('/register', (req, res, next) => {
   });
 });
 
-router.get('/list', (req, res, next) => {
-  User.listUsers((err, users) => {
+router.get('/list', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+  if(req.user.admin) {
+    User.listUsers((err, users) => {
     if (err) {
       res.json({
         success: false,
@@ -53,37 +54,35 @@ router.get('/list', (req, res, next) => {
       });
     }
   });
+  } else {
+    res.json({
+      success: false,
+      message: "Admin Route."
+    });
+  }
 });
 
 router.get('/verify/:ref', (req, res, next) => { 
   let ref = req.params.ref;
-  console.log('ref: ', ref);
   request('https://olr.gdc-uk.org/SearchRegister/SearchResult?RegistrationNumber=' + ref, function (error, response, body) {
-    console.log('error:', error); // Print the error if one occurred and handle it
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     const dom = new JSDOM(body);
-    const status = dom.window.document.querySelectorAll('.singleResultData')[1].textContent;
+    const items = dom.window.document.querySelectorAll('span');
+    const noUser = "record that matches your search";
+
+    for(let item of items){
+      if(item.textContent.includes(noUser)){
+        return res.json({
+          success: false,
+          message: 'No user found for GDC reference number: ' + ref
+        });
+      } 
+    }
+    const status = dom.window.document.querySelectorAll('.singleResultData')[1].textContent;    
+    
     res.json({
+      success: true,
       status: status
     });
-  });
-});
-
-router.get('/:id', (req, res, next) => {
-  let id = req.params.id;
-  User.getUser(id, (err, user) => {
-    if (err) {
-      res.json({
-        success: false,
-        message: 'No user found',
-        error: err // TODO: More specific error message
-      });
-    } else {
-      res.json({
-        success: true,
-        user: user
-      });
-    }
   });
 });
 
@@ -107,7 +106,6 @@ router.post('/authenticate', (req, res, next) => {
       email: user.email,
       admin: user.admin
     }
-
     User.comparePassword(password, user.password, (err, isMatch) => {
       if (err) throw err; // TODO: Improve this response to err
       if (isMatch) {

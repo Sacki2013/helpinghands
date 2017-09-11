@@ -9,13 +9,13 @@ const User = require('../models/user');
 module.exports = function(passport) {
   let opts = {};
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-  opts.secretOrKey = config.secret;
+  opts.secretOrKey = "secret";
   passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
-    User.getUserById(jwt_payload._doc._id, (err, user) => {
+    User.getUserById(jwt_payload.id, (err, user) => {
       if (err) {
         return done(err, false);
       }
-      if (trainer) {
+      if (user) {
         return done(null, user);
       } else {
         return done(null, false);

@@ -1,6 +1,6 @@
 # Helping Hands Dental Agency
 - Developer - Adam Sackfield - adamsackfield@protonmail.com
-- Company Director - Kate Hythe - TODO
+- Company Director - Kate Lyth - TODO
 
 ### Description
 Kate is the Managing Director of Helping Hands, an agenacy that takes on qualified and registered dental nurses and connects them with dental practices in the North-West of England.
